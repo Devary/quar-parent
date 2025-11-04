@@ -7,9 +7,6 @@
 
     <packaging>pom</packaging>
 
-    <modules>
-        <module>quarkus/service-template</module>
-    </modules>
     <properties>
         <compiler-plugin.version>3.14.0</compiler-plugin.version>
         <maven.compiler.release>17</maven.compiler.release>
