@@ -214,7 +214,7 @@ pipeline {
             }
             steps {
                 script {
-                    def projectType = readFile('target/.project-type').trim()
+                    def projectType = fileExists('target/.project-type') ? readFile('target/.project-type').trim() : (env.PROJECT_TYPE ?: 'java')
                     def resolvedVersion = readFile('target/.resolved-version').trim()
                     env.APP_VERSION = resolvedVersion
 
