@@ -50,6 +50,7 @@ pipeline {
         booleanParam(name: 'ENABLE_PROJECT_TYPE_STAGE', defaultValue: false, description: 'Enable project type detection stage')
         booleanParam(name: 'ENABLE_SONAR_STAGE', defaultValue: false, description: 'Enable SonarQube analysis stage')
         booleanParam(name: 'ENABLE_LOGGING', defaultValue: false, description: 'Enable verbose logging/debug steps')
+        booleanParam(name: 'ENABLE_BUILD_CORE_STAGE', defaultValue: false, description: 'Enable core build stage')
     }
 
     options {
@@ -161,6 +162,9 @@ pipeline {
         }
 
         stage('Build Core') {
+            when {
+                expression { return params.ENABLE_BUILD_CORE_STAGE }
+            }
             steps {
                 dir("${env.CORE_DIR}") {
                     sh 'mvn -B -ntp clean package -DskipTests'
