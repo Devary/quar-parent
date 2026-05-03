@@ -50,7 +50,7 @@ pipeline {
         booleanParam(name: 'ENABLE_PROJECT_TYPE_STAGE', defaultValue: false, description: 'Enable project type detection stage')
         booleanParam(name: 'ENABLE_SONAR_STAGE', defaultValue: false, description: 'Enable SonarQube analysis stage')
         booleanParam(name: 'ENABLE_LOGGING', defaultValue: false, description: 'Enable verbose logging/debug steps')
-        booleanParam(name: 'ENABLE_BUILD_CORE_STAGE', defaultValue: false, description: 'Enable core build stage')
+        booleanParam(name: 'ENABLE_BUILD_STAGE', defaultValue: false, description: 'Enable build stage')
     }
 
     options {
@@ -61,7 +61,6 @@ pipeline {
     environment {
         APP_NAME = 'parent'
         APP_VERSION = ''
-        CORE_DIR = 'core'
         RUNDECK_HOST = '192.168.178.41'
         RUNDECK_PORT = '4440'
         IMAGE_NAME = "${APP_NAME}"
@@ -135,7 +134,7 @@ pipeline {
             }
             steps {
                 script {
-                    def pom = readFile("${env.CORE_DIR}/pom.xml")
+                    def pom = readFile('pom.xml')
                     def projectType = 'java'
                     if (pom.contains('quarkus-maven-plugin') || pom.contains('<artifactId>quarkus-bom</artifactId>')) {
                         projectType = 'quarkus'
@@ -161,14 +160,12 @@ pipeline {
             }
         }
 
-        stage('Build Core') {
+        stage('Build Project') {
             when {
-                expression { return params.ENABLE_BUILD_CORE_STAGE }
+                expression { return params.ENABLE_BUILD_STAGE }
             }
             steps {
-                dir("${env.CORE_DIR}") {
-                    sh 'mvn -B -ntp clean package -DskipTests'
-                }
+                sh 'mvn -B -ntp clean package -DskipTests'
             }
         }
 
@@ -180,10 +177,8 @@ pipeline {
                 script {
                     def projectType = fileExists('target/.project-type') ? readFile('target/.project-type').trim() : (env.PROJECT_TYPE ?: 'java')
                     if (projectType == 'quarkus') {
-                        dir("${env.CORE_DIR}") {
-                            withEnv(["JAVA_HOME=${env.GRAALVM24_HOME}", "PATH+GRAAL=${env.GRAALVM24_HOME}/bin"]) {
-                                sh 'mvn -B -ntp package -DskipTests -Dnative'
-                            }
+                        withEnv(["JAVA_HOME=${env.GRAALVM24_HOME}", "PATH+GRAAL=${env.GRAALVM24_HOME}/bin"]) {
+                            sh 'mvn -B -ntp package -DskipTests -Dnative'
                         }
                     } else {
                         echo "Skipping native image build for PROJECT_TYPE=${projectType}"
@@ -192,18 +187,16 @@ pipeline {
             }
         }
 
-        stage('Test Core') {
+        stage('Test Project') {
             when {
                 expression { return !params.SKIP_TESTS }
             }
             steps {
-                dir("${env.CORE_DIR}") {
-                    sh 'mvn -B -ntp test'
-                }
+                sh 'mvn -B -ntp test'
             }
             post {
                 always {
-                    junit allowEmptyResults: true, testResults: 'core/target/surefire-reports/*.xml'
+                    junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
                 }
             }
         }
@@ -218,10 +211,8 @@ pipeline {
                     def resolvedVersion = readFile('target/.resolved-version').trim()
                     env.APP_VERSION = resolvedVersion
 
-                    if (!fileExists("${env.CORE_DIR}/target")) {
-                        dir("${env.CORE_DIR}") {
-                            sh "mvn -B -ntp clean package${params.SKIP_TESTS ? ' -DskipTests' : ''}"
-                        }
+                    if (!fileExists('target')) {
+                        sh "mvn -B -ntp clean package${params.SKIP_TESTS ? ' -DskipTests' : ''}"
                     }
 
                     if (projectType == 'quarkus' && params.GENERATE_NATIVE_IMAGE) {
@@ -231,10 +222,10 @@ pipeline {
                             rm -rf target/package
                             mkdir -p target/package/apps-repo
 
-                            NATIVE_PATH=\$(find core/target -maxdepth 1 -type f -perm -111 ! -name '*.jar' | head -n 1)
+                            NATIVE_PATH=\$(find target -maxdepth 1 -type f -perm -111 ! -name '*.jar' | head -n 1)
 
                             if [ -z "\$NATIVE_PATH" ]; then
-                              echo "No Quarkus native binary found in core/target"
+                              echo "No Quarkus native binary found in target"
                               exit 1
                             fi
 
@@ -249,10 +240,10 @@ pipeline {
                             rm -rf target/package
                             mkdir -p target/package/apps-repo
 
-                            JAR_PATH=\$(find core/target -maxdepth 1 -type f -name '*.jar' ! -name '*-sources.jar' ! -name '*-javadoc.jar' ! -name '*-runner.jar' | head -n 1)
+                            JAR_PATH=\$(find target -maxdepth 1 -type f -name '*.jar' ! -name '*-sources.jar' ! -name '*-javadoc.jar' ! -name '*-runner.jar' | head -n 1)
 
                             if [ -z "\$JAR_PATH" ]; then
-                              echo "No Quarkus jar found in core/target"
+                              echo "No Quarkus jar found in target"
                               exit 1
                             fi
 
@@ -267,10 +258,10 @@ pipeline {
                             rm -rf target/package
                             mkdir -p target/package/apps-repo
 
-                            JAR_PATH=\$(find core/target -maxdepth 1 -type f -name '*.jar' ! -name '*-sources.jar' ! -name '*-javadoc.jar' | head -n 1)
+                            JAR_PATH=\$(find target -maxdepth 1 -type f -name '*.jar' ! -name '*-sources.jar' ! -name '*-javadoc.jar' | head -n 1)
 
                             if [ -z "\$JAR_PATH" ]; then
-                              echo "No Spring Boot jar found in core/target"
+                              echo "No Spring Boot jar found in target"
                               exit 1
                             fi
 
@@ -285,10 +276,10 @@ pipeline {
                             rm -rf target/package
                             mkdir -p target/package/apps-repo
 
-                            JAR_PATH=\$(find core/target -maxdepth 1 -type f -name '*.jar' ! -name '*-sources.jar' ! -name '*-javadoc.jar' ! -name '*-runner.jar' | head -n 1)
+                            JAR_PATH=\$(find target -maxdepth 1 -type f -name '*.jar' ! -name '*-sources.jar' ! -name '*-javadoc.jar' ! -name '*-runner.jar' | head -n 1)
 
                             if [ -z "\$JAR_PATH" ]; then
-                              echo "No build jar found in core/target"
+                              echo "No build jar found in target"
                               exit 1
                             fi
 
@@ -307,9 +298,7 @@ pipeline {
                 branch 'master'
             }
             steps {
-                dir("${env.CORE_DIR}") {
-                    sh 'mvn -B -ntp -Puse-jfrog deploy -DskipTests'
-                }
+                sh 'mvn -B -ntp -Puse-jfrog deploy -DskipTests'
             }
         }
 
@@ -489,7 +478,7 @@ IMAGE_PATH=${env.HARBOR_REGISTRY}/${env.HARBOR_PROJECT}/${env.IMAGE_NAME}
                           RESOLVED_VERSION=$(cat target/.resolved-version)
                           git config user.name "jenkins"
                           git config user.email "jenkins@local"
-                          git add pom.xml core/pom.xml service-template/pom.xml quarkus-service-template/pom.xml chassis/pom.xml 2>/dev/null || true
+                          git add pom.xml service-template/pom.xml quarkus-service-template/pom.xml chassis/pom.xml 2>/dev/null || true
                           if ! git diff --cached --quiet; then
                             git commit -m "Bump Maven version to ${RESOLVED_VERSION} [skip ci]"
                             REMOTE_URL=$(git remote get-url origin)
