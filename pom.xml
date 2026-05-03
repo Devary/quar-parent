@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.sandbox</groupId>
+    <groupId>com.devary</groupId>
     <artifactId>parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.1-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 
@@ -203,6 +203,18 @@
 
         <profile>
             <id>local</id>
+            <properties>
+                <quarkus.datasource.db-kind.pg>postgresql</quarkus.datasource.db-kind.pg>
+                <quarkus.datasource.username.pg>postgres</quarkus.datasource.username.pg>
+                <quarkus.datasource.password.pg>postgresql</quarkus.datasource.password.pg>
+                <quarkus.datasource.reactive.url.pg>vertx-reactive:postgresql://localhost:5432/postgres</quarkus.datasource.reactive.url.pg>
+                <quarkus.datasource.reactive.max-size.pg>20</quarkus.datasource.reactive.max-size.pg>
+                <quarkus.hibernate-orm.database.generation.pg>update</quarkus.hibernate-orm.database.generation.pg>
+                <quarkus.datasource.jdbc.url.pg>jdbc:postgresql://localhost:5432/postgres</quarkus.datasource.jdbc.url.pg>
+            </properties>
+        </profile>
+        <profile>
+            <id>prod</id>
             <properties>
                 <quarkus.datasource.db-kind.pg>postgresql</quarkus.datasource.db-kind.pg>
                 <quarkus.datasource.username.pg>postgres</quarkus.datasource.username.pg>
