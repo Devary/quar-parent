@@ -209,13 +209,30 @@ pipeline {
                 script {
                     def projectType = fileExists('target/.project-type') ? readFile('target/.project-type').trim() : (env.PROJECT_TYPE ?: 'java')
                     def resolvedVersion = readFile('target/.resolved-version').trim()
+                    def packagingType = sh(
+                        script: "mvn -B -ntp -q help:evaluate -Dexpression=project.packaging -DforceStdout",
+                        returnStdout: true
+                    ).trim()
                     env.APP_VERSION = resolvedVersion
 
-                    if (!fileExists('target')) {
+                    if (packagingType != 'pom' && !fileExists('target')) {
                         sh "mvn -B -ntp clean package${params.SKIP_TESTS ? ' -DskipTests' : ''}"
                     }
 
-                    if (projectType == 'quarkus' && params.GENERATE_NATIVE_IMAGE) {
+                    if (packagingType == 'pom') {
+                        sh """
+                            set -euo pipefail
+                            APP_VERSION='${resolvedVersion}'
+                            rm -rf target/package
+                            mkdir -p target/package/apps-repo
+
+                            cp pom.xml "target/package/apps-repo/${APP_NAME}.pom"
+                            [ -f README.md ] && cp README.md target/package/ || true
+
+                            cd target/package
+                            zip -r "../${APP_NAME}-\${APP_VERSION}.zip" .
+                        """
+                    } else if (projectType == 'quarkus' && params.GENERATE_NATIVE_IMAGE) {
                         sh """
                             set -euo pipefail
                             APP_VERSION='${resolvedVersion}'
