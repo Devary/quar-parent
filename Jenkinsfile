@@ -45,7 +45,7 @@ pipeline {
     parameters {
         string(name: 'MANUAL_VERSION', defaultValue: '', description: 'Optional: override the Maven version for this build')
         booleanParam(name: 'GENERATE_NATIVE_IMAGE', defaultValue: false, description: 'Build the Quarkus native image for this run')
-        booleanParam(name: 'PACKAGE_ONLY', defaultValue: false, description: 'Package/publish to Maven only and skip image build + deployment flow')
+        booleanParam(name: 'PACKAGE_ONLY', defaultValue: true, description: 'Package/publish to Maven only and skip image build + deployment flow')
         booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: 'Skip Maven test execution in build and test stages')
         booleanParam(name: 'ENABLE_PROJECT_TYPE_STAGE', defaultValue: false, description: 'Enable project type detection stage')
         booleanParam(name: 'ENABLE_SONAR_STAGE', defaultValue: false, description: 'Enable SonarQube analysis stage')
