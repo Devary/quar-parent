@@ -47,6 +47,9 @@ pipeline {
         booleanParam(name: 'GENERATE_NATIVE_IMAGE', defaultValue: false, description: 'Build the Quarkus native image for this run')
         booleanParam(name: 'PACKAGE_ONLY', defaultValue: false, description: 'Package/publish to Maven only and skip image build + deployment flow')
         booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: 'Skip Maven test execution in build and test stages')
+        booleanParam(name: 'ENABLE_PROJECT_TYPE_STAGE', defaultValue: false, description: 'Enable project type detection stage')
+        booleanParam(name: 'ENABLE_SONAR_STAGE', defaultValue: false, description: 'Enable SonarQube analysis stage')
+        booleanParam(name: 'ENABLE_LOGGING', defaultValue: false, description: 'Enable verbose logging/debug steps')
     }
 
     options {
@@ -79,7 +82,11 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
-                sh 'git status --short || true'
+                script {
+                    if (params.ENABLE_LOGGING) {
+                        sh 'git status --short || true'
+                    }
+                }
             }
         }
 
@@ -106,7 +113,9 @@ pipeline {
                             mvn -B -ntp versions:set -DnewVersion=${targetVersion} -DprocessAllModules=true -DgenerateBackupPoms=false
                         """
 
-                        sh 'git status --short'
+                        if (params.ENABLE_LOGGING) {
+                            sh 'git status --short'
+                        }
                     } else {
                         echo "Skipping version mutation on branch ${env.BRANCH_NAME}; using ${effectiveCurrentVersion}"
                     }
@@ -120,6 +129,9 @@ pipeline {
         }
 
         stage('Detect Project Type') {
+            when {
+                expression { return params.ENABLE_PROJECT_TYPE_STAGE }
+            }
             steps {
                 script {
                     def pom = readFile("${env.CORE_DIR}/pom.xml")
@@ -138,6 +150,9 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
+            when {
+                expression { return params.ENABLE_SONAR_STAGE }
+            }
             steps{
                  withSonarQubeEnv('SonarQube') {
                    sh "mvn clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=anipoll -Dsonar.projectName='anipoll'"
@@ -159,7 +174,7 @@ pipeline {
             }
             steps {
                 script {
-                    def projectType = readFile('target/.project-type').trim()
+                    def projectType = fileExists('target/.project-type') ? readFile('target/.project-type').trim() : (env.PROJECT_TYPE ?: 'java')
                     if (projectType == 'quarkus') {
                         dir("${env.CORE_DIR}") {
                             withEnv(["JAVA_HOME=${env.GRAALVM24_HOME}", "PATH+GRAAL=${env.GRAALVM24_HOME}/bin"]) {
@@ -302,7 +317,7 @@ CMD ["sh", "-c", "echo hello from jenkins harbor test && sleep 3600"]
 
         stage('Debug Variables') {
             when {
-                expression { return !params.PACKAGE_ONLY }
+                expression { return !params.PACKAGE_ONLY && params.ENABLE_LOGGING }
             }
             steps {
                 sh '''
@@ -345,7 +360,9 @@ LATEST_IMAGE=${env.HARBOR_REGISTRY}/${env.HARBOR_PROJECT}/${env.IMAGE_NAME}:late
 IMAGE_PATH=${env.HARBOR_REGISTRY}/${env.HARBOR_PROJECT}/${env.IMAGE_NAME}
 """
 
-                    sh 'cat target/.image-vars'
+                    if (params.ENABLE_LOGGING) {
+                        sh 'cat target/.image-vars'
+                    }
                 }
             }
         }
@@ -425,11 +442,13 @@ IMAGE_PATH=${env.HARBOR_REGISTRY}/${env.HARBOR_PROJECT}/${env.IMAGE_NAME}
 
                       . target/.image-vars
 
-                      echo "IMAGE_PATH=$IMAGE_PATH"
-                      echo "IMAGE_TAG=$IMAGE_TAG"
-                      echo "NAMESPACE="
-                      echo "DEPLOYMENT_NAME=$DEPLOYMENT_NAME"
-                      echo "CONTAINER_NAME=$CONTAINER_NAME"
+                      if [ "${ENABLE_LOGGING:-false}" = "true" ]; then
+                        echo "IMAGE_PATH=$IMAGE_PATH"
+                        echo "IMAGE_TAG=$IMAGE_TAG"
+                        echo "NAMESPACE=$NAMESPACE"
+                        echo "DEPLOYMENT_NAME=$DEPLOYMENT_NAME"
+                        echo "CONTAINER_NAME=$CONTAINER_NAME"
+                      fi
 
                       curl -sS -X POST "${RUNDECK_HOST}:${RUNDECK_PORT}/api/46/job/${RUNDECK_JOB_ID}/run" \
                         -H "X-Rundeck-Auth-Token: $RUNDECK_TOKEN" \
@@ -487,13 +506,17 @@ IMAGE_PATH=${env.HARBOR_REGISTRY}/${env.HARBOR_PROJECT}/${env.IMAGE_NAME}
                     echo 'PACKAGE_ONLY=true, so image build and deployment stages were skipped.'
                 }
             }
-            sh '''
+            script {
+                if (params.ENABLE_LOGGING) {
+                    sh '''
               if [ -f target/.image-vars ]; then
                 . target/.image-vars
                 echo "Pushed image: $FULL_IMAGE"
                 echo "Latest image: $LATEST_IMAGE"
               fi
             '''
+                }
+            }
         }
         failure {
             echo 'Pipeline failed. Check compile/test logs above.'
