@@ -51,6 +51,7 @@ pipeline {
         booleanParam(name: 'ENABLE_SONAR_STAGE', defaultValue: false, description: 'Enable SonarQube analysis stage')
         booleanParam(name: 'ENABLE_LOGGING', defaultValue: false, description: 'Enable verbose logging/debug steps')
         booleanParam(name: 'ENABLE_BUILD_STAGE', defaultValue: false, description: 'Enable build stage')
+        booleanParam(name: 'ENABLE_JFROG_DEPLOY', defaultValue: false, description: 'Enable deploy to JFrog stage')
     }
 
     options {
@@ -312,7 +313,10 @@ pipeline {
 
         stage('Deploy to JFrog') {
             when {
-                branch 'master'
+                allOf {
+                    branch 'master'
+                    expression { return params.ENABLE_JFROG_DEPLOY }
+                }
             }
             steps {
                 sh 'mvn -B -ntp -Puse-jfrog deploy -DskipTests'
