@@ -218,6 +218,12 @@ pipeline {
                     def resolvedVersion = readFile('target/.resolved-version').trim()
                     env.APP_VERSION = resolvedVersion
 
+                    if (!fileExists("${env.CORE_DIR}/target")) {
+                        dir("${env.CORE_DIR}") {
+                            sh "mvn -B -ntp clean package${params.SKIP_TESTS ? ' -DskipTests' : ''}"
+                        }
+                    }
+
                     if (projectType == 'quarkus' && params.GENERATE_NATIVE_IMAGE) {
                         sh """
                             set -euo pipefail
