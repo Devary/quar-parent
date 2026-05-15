@@ -23,7 +23,7 @@ pipeline {
     }
 
     environment {
-        APP_NAME = params.IMAGE_REPOSITORY
+        APP_NAME = ${params.IMAGE_REPOSITORY}
         APP_PORT = '8080'
         MAVEN_CMD = 'mvn'
         RUNDECK_INSTANCE = 'local-rundeck'
