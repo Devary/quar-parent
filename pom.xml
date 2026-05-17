@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.devary</groupId>
     <artifactId>parent</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
 
     <packaging>pom</packaging>
 
@@ -17,8 +17,8 @@
         <quarkus.platform.version>3.28.5</quarkus.platform.version>
         <skipITs>true</skipITs>
         <surefire-plugin.version>3.5.4</surefire-plugin.version>
-        <vault.kv.mount.path>secret</vault.kv.mount.path>
-        <vault.secret.config.path>apps/${project.artifactId}</vault.secret.config.path>
+        <vault.kv.mount.path>anipoll</vault.kv.mount.path>
+        <vault.secret.config.path>${project.artifactId}</vault.secret.config.path>
         <vault.kubernetes.role>${project.artifactId}</vault.kubernetes.role>
         <!--Swagger properties :-->
         <quarkus.smallrye-openapi.info-title>Name of my API</quarkus.smallrye-openapi.info-title>
