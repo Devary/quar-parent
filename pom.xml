@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.devary</groupId>
     <artifactId>parent</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
 
     <packaging>pom</packaging>
 
@@ -22,18 +22,23 @@
         <vault.kv.mount.path>anipoll</vault.kv.mount.path>
         <vault.secret.config.path>${project.artifactId}</vault.secret.config.path>
         <vault.kubernetes.role>${project.artifactId}</vault.kubernetes.role>
-        <!--Swagger properties :-->
-        <quarkus.smallrye-openapi.info-title>Name of my API</quarkus.smallrye-openapi.info-title>
-        <dev.quarkus.smallrye-openapi.info-title>Name of my API (dev)</dev.quarkus.smallrye-openapi.info-title>
-        <test.quarkus.smallrye-openapi.info-title>Name of my API (test)</test.quarkus.smallrye-openapi.info-title>
-        <quarkus.smallrye-openapi.info-version>1.0.0</quarkus.smallrye-openapi.info-version>
-        <quarkus.smallrye-openapi.info-description>Just an example service</quarkus.smallrye-openapi.info-description>
-        <quarkus.smallrye-openapi.info-terms-of-service>Terms of the service</quarkus.smallrye-openapi.info-terms-of-service>
+        <!-- Swagger / OpenAPI defaults inherited by child services via Maven filtering -->
+        <quarkus.smallrye-openapi.info-title>${project.artifactId} API</quarkus.smallrye-openapi.info-title>
+        <dev.quarkus.smallrye-openapi.info-title>${project.artifactId} API (dev)</dev.quarkus.smallrye-openapi.info-title>
+        <test.quarkus.smallrye-openapi.info-title>${project.artifactId} API (test)</test.quarkus.smallrye-openapi.info-title>
+        <quarkus.smallrye-openapi.info-version>${project.version}</quarkus.smallrye-openapi.info-version>
+        <quarkus.smallrye-openapi.info-description>Reusable Quarkus service template with REST, Vault, database, gRPC, and OpenAPI support.</quarkus.smallrye-openapi.info-description>
+        <quarkus.smallrye-openapi.info-terms-of-service>https://devary.pro/terms</quarkus.smallrye-openapi.info-terms-of-service>
         <quarkus.smallrye-openapi.info-contact-email>support@devary.pro</quarkus.smallrye-openapi.info-contact-email>
         <quarkus.smallrye-openapi.info-contact-name>Fakher Hammami</quarkus.smallrye-openapi.info-contact-name>
         <quarkus.smallrye-openapi.info-contact-url>https://devary.pro/contact</quarkus.smallrye-openapi.info-contact-url>
         <quarkus.smallrye-openapi.info-license-name>Apache 2.0</quarkus.smallrye-openapi.info-license-name>
         <quarkus.smallrye-openapi.info-license-url>https://www.apache.org/licenses/LICENSE-2.0.html</quarkus.smallrye-openapi.info-license-url>
+        <quarkus.smallrye-openapi.path>/q/openapi</quarkus.smallrye-openapi.path>
+        <quarkus.swagger-ui.always-include>true</quarkus.swagger-ui.always-include>
+        <quarkus.swagger-ui.path>/q/swagger-ui</quarkus.swagger-ui.path>
+        <quarkus.swagger-ui.title>${project.artifactId} API Docs</quarkus.swagger-ui.title>
+        <quarkus.swagger-ui.theme>material</quarkus.swagger-ui.theme>
     </properties>
 
     <dependencyManagement>
