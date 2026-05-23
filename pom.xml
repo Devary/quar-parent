@@ -22,6 +22,7 @@
         <vault.kv.mount.path>anipoll</vault.kv.mount.path>
         <vault.secret.config.path>${project.artifactId}</vault.secret.config.path>
         <vault.kubernetes.role>${project.artifactId}</vault.kubernetes.role>
+        <fakher>fakher</fakher>
         <!-- Swagger / OpenAPI defaults inherited by child services via Maven filtering -->
         <quarkus.smallrye-openapi.info-title>${project.artifactId} API</quarkus.smallrye-openapi.info-title>
         <dev.quarkus.smallrye-openapi.info-title>${project.artifactId} API (dev)</dev.quarkus.smallrye-openapi.info-title>
