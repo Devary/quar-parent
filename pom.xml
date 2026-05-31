@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.devary</groupId>
     <artifactId>parent</artifactId>
-    <version>1.0.9</version>
+    <version>1.0.10</version>
 
     <packaging>pom</packaging>
 
@@ -84,22 +84,6 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-hibernate-reactive</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-hibernate-reactive-panache</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-reactive-pg-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-jdbc-postgresql</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
@@ -281,7 +265,34 @@
     <profiles>
 
         <profile>
+            <id>with-database</id>
+            <dependencies>
+                <dependency>
+                    <groupId>io.quarkus</groupId>
+                    <artifactId>quarkus-hibernate-reactive</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.quarkus</groupId>
+                    <artifactId>quarkus-hibernate-reactive-panache</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.quarkus</groupId>
+                    <artifactId>quarkus-reactive-pg-client</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.quarkus</groupId>
+                    <artifactId>quarkus-jdbc-postgresql</artifactId>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <profile>
             <id>local</id>
+            <activation>
+                <property>
+                    <name>with-database</name>
+                </property>
+            </activation>
             <properties>
                 <quarkus.datasource.db-kind.pg>postgresql</quarkus.datasource.db-kind.pg>
                 <quarkus.datasource.username.pg>postgres</quarkus.datasource.username.pg>
@@ -294,6 +305,11 @@
         </profile>
         <profile>
             <id>prod</id>
+            <activation>
+                <property>
+                    <name>with-database</name>
+                </property>
+            </activation>
             <properties>
                 <quarkus.datasource.db-kind.pg>postgresql</quarkus.datasource.db-kind.pg>
                 <quarkus.datasource.username.pg>postgres</quarkus.datasource.username.pg>
