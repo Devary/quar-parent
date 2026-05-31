@@ -20,7 +20,7 @@
         <surefire-plugin.version>3.5.4</surefire-plugin.version>
         <jacoco.version>0.8.12</jacoco.version>
         <jacoco.minimum.coverage>0.85</jacoco.minimum.coverage>
-        <vault.kv.mount.path>anipoll</vault.kv.mount.path>
+        <vault.kv.mount.path>kv</vault.kv.mount.path>
         <vault.secret.config.path>${project.artifactId}</vault.secret.config.path>
         <vault.kubernetes.role>${project.artifactId}</vault.kubernetes.role>
         <fakher>fakher</fakher>
