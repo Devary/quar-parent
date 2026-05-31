@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.devary</groupId>
     <artifactId>parent</artifactId>
-    <version>1.0.8</version>
+    <version>1.0.9</version>
 
     <packaging>pom</packaging>
 
@@ -41,6 +41,7 @@
         <quarkus.swagger-ui.path>/q/swagger-ui</quarkus.swagger-ui.path>
         <quarkus.swagger-ui.title>${project.artifactId} API Docs</quarkus.swagger-ui.title>
         <quarkus.swagger-ui.theme>material</quarkus.swagger-ui.theme>
+        <jfrog.base.url>http://192.168.178.41:30990/artifactory</jfrog.base.url>
     </properties>
 
     <dependencyManagement>
@@ -125,6 +126,19 @@
             <artifactId>quarkus-micrometer-registry-prometheus</artifactId>
         </dependency>
     </dependencies>
+
+    <distributionManagement>
+        <repository>
+            <id>jfrog-releases</id>
+            <name>JFrog Releases</name>
+            <url>${jfrog.base.url}/dev-mvn-repo</url>
+        </repository>
+        <snapshotRepository>
+            <id>jfrog-snapshots</id>
+            <name>JFrog Snapshots</name>
+            <url>${jfrog.base.url}/dev-mvn-repo</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <build>
         <!-- Make all modules filter their application*.properties -->
@@ -324,24 +338,6 @@
                     </plugin>
                 </plugins>
             </build>
-        </profile>
-        <profile>
-            <id>use-jfrog</id>
-            <properties>
-                <jfrog.base.url>http://192.168.178.41:30990/artifactory</jfrog.base.url>
-            </properties>
-            <distributionManagement>
-                <repository>
-                    <id>jfrog-releases</id>
-                    <name>JFrog Releases</name>
-                    <url>${jfrog.base.url}/dev-mvn-repo</url>
-                </repository>
-                <snapshotRepository>
-                    <id>jfrog-snapshots</id>
-                    <name>JFrog Snapshots</name>
-                    <url>${jfrog.base.url}/dev-mvn-repo</url>
-                </snapshotRepository>
-            </distributionManagement>
         </profile>
     </profiles>
 </project>
