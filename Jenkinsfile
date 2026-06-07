@@ -102,12 +102,8 @@ pipeline {
                 withSonarQubeEnv(env.SONARQUBE_ENV) {
                     sh """
                         set -euo pipefail
-                        : "\${SONAR_HOST_URL:?SONAR_HOST_URL was not provided by withSonarQubeEnv}"
-                        : "\${SONAR_AUTH_TOKEN:?SONAR_AUTH_TOKEN was not provided by withSonarQubeEnv}"
-                        $MAVEN_CMD -s "$MAVEN_USER_SETTINGS_FILE" -gs "$MAVEN_GLOBAL_SETTINGS_FILE" -B -ntp verify org.sonarsource.scanner.maven:sonar-maven-plugin:5.7.0.6970:sonar \
+                        $MAVEN_CMD -s "$MAVEN_USER_SETTINGS_FILE" -gs "$MAVEN_GLOBAL_SETTINGS_FILE" -B -ntp verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
                           -DskipTests \
-                          -Dsonar.host.url="$SONAR_HOST_URL" \
-                          -Dsonar.token="$SONAR_AUTH_TOKEN" \
                           -Dsonar.projectKey=${env.APP_NAME} \
                           -Dsonar.projectName=${env.APP_NAME}
                     """
