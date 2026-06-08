@@ -38,7 +38,7 @@ pipeline {
         HARBOR_REGISTRY = '192.168.178.41:30002'
         INFRA_REPO_URL = 'https://github.com/Devary/infra.git'
         INFRA_REPO_BRANCH = 'main'
-        JF_URL = 'https://192.168.178.41:32642'
+        JF_URL = 'https://192.168.178.41:30150'
         JF_SERVER_ID = 'local-artifactory'
         JFROG_CLI_LOG_LEVEL = 'INFO'
         JFROG_CLI_BUILD_NAME = "${JOB_NAME}"
