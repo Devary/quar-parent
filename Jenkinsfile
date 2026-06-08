@@ -4,6 +4,7 @@ pipeline {
     tools {
         jdk 'graalvm17'
         maven 'Maven'
+        jfrog 'jfrog-cli'
     }
 
     parameters {
@@ -37,6 +38,11 @@ pipeline {
         HARBOR_REGISTRY = '192.168.178.41:30002'
         INFRA_REPO_URL = 'https://github.com/Devary/infra.git'
         INFRA_REPO_BRANCH = 'main'
+        JF_URL = 'https://192.168.178.41:32642'
+        JF_SERVER_ID = 'local-artifactory'
+        JFROG_CLI_LOG_LEVEL = 'INFO'
+        JFROG_CLI_BUILD_NAME = "${JOB_NAME}"
+        JFROG_CLI_BUILD_NUMBER = "${BUILD_NUMBER}"
     }
 
     stages {
@@ -134,6 +140,31 @@ pipeline {
             }
         }
 
+        stage('Configure JFrog') {
+            when {
+                expression { params.ENABLE_JFROG_DEPLOY }
+            }
+            steps {
+                withCredentials([string(credentialsId: 'jfrog-token', variable: 'JF_TOKEN')]) {
+                    jf '''
+                        jf c add "$JF_SERVER_ID" \
+                          --url="$JF_URL" \
+                          --access-token="$JF_TOKEN" \
+                          --interactive=false \
+                          --overwrite=true
+
+                        jf mvn-config \
+                          --server-id-resolve="$JF_SERVER_ID" \
+                          --server-id-deploy="$JF_SERVER_ID" \
+                          --repo-resolve-releases=dev-mvn-repo \
+                          --repo-resolve-snapshots=dev-mvn-repo \
+                          --repo-deploy-releases=dev-mvn-repo \
+                          --repo-deploy-snapshots=dev-mvn-repo
+                    '''
+                }
+            }
+        }
+
         stage('Deploy to JFrog') {
             when {
                 expression { params.ENABLE_JFROG_DEPLOY }
@@ -141,8 +172,17 @@ pipeline {
             steps {
                 script {
                     def skipFlag = params.SKIP_TESTS ? ' -DskipTests' : ''
-                    sh "$MAVEN_CMD -s \"$MAVEN_USER_SETTINGS_FILE\" -gs \"$MAVEN_GLOBAL_SETTINGS_FILE\" -B -ntp deploy${skipFlag}"
+                    jf "jf mvn -s \"$MAVEN_USER_SETTINGS_FILE\" -gs \"$MAVEN_GLOBAL_SETTINGS_FILE\" -B -ntp deploy${skipFlag}"
                 }
+            }
+        }
+
+        stage('Publish Build Info') {
+            when {
+                expression { params.ENABLE_JFROG_DEPLOY }
+            }
+            steps {
+                jf 'jf rt build-publish'
             }
         }
 
