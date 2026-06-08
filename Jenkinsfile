@@ -146,8 +146,8 @@ pipeline {
             }
             steps {
                 withCredentials([string(credentialsId: 'jfrog-token', variable: 'JF_TOKEN')]) {
-                    jf 'c add "$JF_SERVER_ID" --url="$JF_URL" --access-token="$JF_TOKEN" --interactive=false --overwrite=true'
-                    jf 'mvn-config --server-id-resolve="$JF_SERVER_ID" --server-id-deploy="$JF_SERVER_ID" --repo-resolve-releases=dev-mvn-repo --repo-resolve-snapshots=dev-mvn-repo --repo-deploy-releases=dev-mvn-repo --repo-deploy-snapshots=dev-mvn-repo'
+                    jf "c add ${env.JF_SERVER_ID} --url=${env.JF_URL} --access-token=${JF_TOKEN} --interactive=false --overwrite=true"
+                    jf "mvn-config --server-id-resolve=${env.JF_SERVER_ID} --server-id-deploy=${env.JF_SERVER_ID} --repo-resolve-releases=dev-mvn-repo --repo-resolve-snapshots=dev-mvn-repo --repo-deploy-releases=dev-mvn-repo --repo-deploy-snapshots=dev-mvn-repo"
                 }
             }
         }
@@ -159,7 +159,7 @@ pipeline {
             steps {
                 script {
                     def skipFlag = params.SKIP_TESTS ? ' -DskipTests' : ''
-                    jf "mvn -s \"$MAVEN_USER_SETTINGS_FILE\" -gs \"$MAVEN_GLOBAL_SETTINGS_FILE\" -B -ntp deploy${skipFlag}"
+                    jf "mvn -s ${env.MAVEN_USER_SETTINGS_FILE} -gs ${env.MAVEN_GLOBAL_SETTINGS_FILE} -B -ntp deploy${skipFlag}"
                 }
             }
         }
