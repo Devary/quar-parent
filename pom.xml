@@ -41,7 +41,7 @@
         <quarkus.swagger-ui.path>/q/swagger-ui</quarkus.swagger-ui.path>
         <quarkus.swagger-ui.title>${project.artifactId} API Docs</quarkus.swagger-ui.title>
         <quarkus.swagger-ui.theme>material</quarkus.swagger-ui.theme>
-        <jfrog.base.url>https://192.168.178.41:32642/artifactory</jfrog.base.url>
+        <jfrog.base.url>https://192.168.178.41:30150/artifactory</jfrog.base.url>
     </properties>
 
     <dependencyManagement>
