@@ -157,13 +157,13 @@
 
     <distributionManagement>
         <repository>
-            <id>jfrog-releases</id>
-            <name>JFrog Releases</name>
+            <id>artifactory-release</id>
+            <name>dev-mvn-repo-releases</name>
             <url>${jfrog.base.url}/dev-mvn-repo</url>
         </repository>
         <snapshotRepository>
-            <id>jfrog-snapshots</id>
-            <name>JFrog Snapshots</name>
+            <id>artifactory-snapshot</id>
+            <name>dev-mvn-repo-snapshots</name>
             <url>${jfrog.base.url}/dev-mvn-repo</url>
         </snapshotRepository>
     </distributionManagement>
